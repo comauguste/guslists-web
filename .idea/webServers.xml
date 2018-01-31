@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="WebServers">
+    <option name="servers">
+      <webServer id="889d1960-de9e-4a41-8d79-73c55630bd37" name="guslists-dev" url="http://devguslists.com/">
+        <fileTransfer host="ec2-54-210-204-102.compute-1.amazonaws.com" port="22" privateKey="$USER_HOME$/guslists-dev-server.pem" accessType="SFTP" keyPair="true">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" />
+          </advancedOptions>
+          <option name="port" value="22" />
+        </fileTransfer>
+      </webServer>
+    </option>
+  </component>
+</project>

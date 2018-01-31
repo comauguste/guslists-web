@@ -1,0 +1,16 @@
+.tabberlive { margin:0px;float:left;width:100%;clear:both;}
+.tabberlive .tabbertabhide { display:none; }
+.tabberlive ul.tabbernav { background: #f8f8f8; list-style-type: none; margin: 10px 0 0 0; z-index: 5; position: relative; float: left; width: 100%; clear: both; box-shadow: 0 -2px 0 #ccc inset; -moz-box-shadow: 0 -2px 0 #ccc inset; -webkit-box-shadow: 0 -2px 0 #ccc inset;}
+.tabberlive ul.tabbernav li { list-style: none; margin: 0; display: inline;float:left;width:auto;white-space: nowrap;}
+
+ul.tabbernav li a {cursor: pointer; text-decoration: none; color: #444; font-weight: normal; font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin: 0; width: auto; float: left; font-family: "Trebuchet MS",Helvetica,sans-serif; border-bottom: 2px solid #ccc; padding: 6px 10px 5px 10px; -webkit-transition: 0s linear all; -moz-transition: 0s linear all; -ms-transition: 0s linear all; -o-transition: 0s linear all; transition: 0s linear all;}
+ul.tabbernav li.tabberactive a {padding-top: 4px;font-weight:bold; cursor: default; font-size: 12px; border-top: 5px solid #80C74E; margin: -3px 0 0 0; border-bottom: 2px solid #669D40; background: #80C74E; color: #fff;}
+ul.tabbernav li a:hover {border-bottom: 2px solid #669D40;}
+
+.tabberlive .tabbertab {margin:1px 0 0 0;float: left;clear: both;width: 100%;padding:8px;background:#f8f8f8;-webkit-transition:0.1s linear all;-moz-transition:0.1s linear all;-ms-transition:0.1s linear all;-o-transition:0.1s linear all;transition:0.1s linear all;}
+.tabberlive .tabbertab h2 { display:none; }
+.tabberlive .tabbertab h3 { display:none; }
+.tabberlive .tabbertab p {float:left;width:100%;clear:both;margin:5px 0;}
+
+.tabberlive#tab2 .tabbertab { height:200px; overflow:auto;}
+ul.tabbernav li .button {padding:5px}
