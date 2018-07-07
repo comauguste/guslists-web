@@ -1,4 +1,5 @@
 <?php
+
 namespace Listing;
 
 use Guslists\Db;
@@ -79,6 +80,7 @@ class Listing
         $sql = "SELECT 
                     i.dt_pub_date AS `publish_date`,
                     i.fk_i_category_id AS `category_id`,
+                    cd.s_name AS `category_name`,
                     i.pk_i_id AS `listing_id`, 
                     tu.pk_i_id AS `user_id`,
                     id.s_title AS `title`,
@@ -90,9 +92,9 @@ class Listing
                     il.s_city AS `city`,
                     il.s_country AS `country`,
                     il.s_region AS `region`,
-                    i.s_contact_name AS `seller_name`,
-                    i.s_contact_email AS `seller_email`,
-                    tu.s_phone_mobile AS `seller_mobile_no`,
+                    i.s_contact_name AS `publisher_name`,
+                    i.s_contact_email AS `publisher_email`,
+                    tu.s_phone_mobile AS `publisher_mobile_no`,
                     tu.s_website AS `website`,
 					group_concat(concat(ir.s_path ,ir.pk_i_id,'.',ir.s_extension)) AS images                  
                 FROM bf_t_item i
@@ -100,6 +102,122 @@ class Listing
                 JOIN bf_t_user tu ON tu.pk_i_id = i.fk_i_user_id
                 JOIN bf_t_item_location il ON il.fk_i_item_id = i.pk_i_id
                 JOIN bf_t_item_resource ir ON ir.fk_i_item_id = i.pk_i_id
+                JOIN bf_t_category_description cd ON cd.fk_i_category_id = i.fk_i_category_id
+                WHERE tu.pk_i_id = :user_id
+                GROUP BY i.pk_i_id
+                ORDER BY i.dt_pub_date DESC;";
+        $sth = $this->conn->prepare($sql);
+        $sth->bindParam(":user_id", $userId);
+        $sth->execute();
+
+        $tempListings = $sth->fetchAll(PDO::FETCH_ASSOC);
+
+        foreach ($tempListings as $listing) {
+            $listing['price'] = $listing['price'] / 1000000;
+            $listing['images'] = $this->generateFullImageUrls($listing['images']);
+            $listings [] = $listing;
+        }
+
+        if (count($listings) > 0) {
+            $result['listings'] = $listings;
+            return $result;
+        } else {
+            $result['error'] = true;
+            $result['listings'] = $listings;
+            return $result;
+        }
+    }
+
+    public function retrieveUserPublishedListings($userId)
+    {
+        $listings = [];
+        $result = ["error" => false];
+
+        $sql = "SELECT 
+                    i.dt_pub_date AS `publish_date`,
+                    i.fk_i_category_id AS `category_id`,
+                    cd.s_name AS `category_name`,
+                    i.pk_i_id AS `listing_id`, 
+                    tu.pk_i_id AS `user_id`,
+                    id.s_title AS `title`,
+                    id.s_description AS `description`,
+                    'active' AS `status`,
+                    i.f_price,
+                    i_price AS `price`,
+                    i.fk_c_currency_code AS `currency`,
+                    il.s_address AS `address`,
+                    il.s_city AS `city`,
+                    il.s_country AS `country`,
+                    il.s_region AS `region`,
+                    i.s_contact_name AS `publisher_name`,
+                    i.s_contact_email AS `publisher_email`,
+                    tu.s_phone_mobile AS `publisher_mobile_no`,
+                    tu.s_website AS `website`,
+					group_concat(concat(ir.s_path ,ir.pk_i_id,'.',ir.s_extension)) AS images                  
+                FROM bf_t_item i
+                JOIN bf_t_item_description id ON id.fk_i_item_id = i.pk_i_id
+                JOIN bf_t_user tu ON tu.pk_i_id = i.fk_i_user_id
+                JOIN bf_t_item_location il ON il.fk_i_item_id = i.pk_i_id
+                JOIN bf_t_item_resource ir ON ir.fk_i_item_id = i.pk_i_id
+                JOIN bf_t_category_description cd ON cd.fk_i_category_id = i.fk_i_category_id
+                WHERE tu.pk_i_id = :user_id
+                GROUP BY i.pk_i_id
+                ORDER BY i.dt_pub_date DESC;";
+        $sth = $this->conn->prepare($sql);
+        $sth->bindParam(":user_id", $userId);
+        $sth->execute();
+
+        $tempListings = $sth->fetchAll(PDO::FETCH_ASSOC);
+
+        foreach ($tempListings as $listing) {
+            $listing['price'] = $listing['price'] / 1000000;
+            $listing['images'] = $this->generateFullImageUrls($listing['images']);
+            $listings [] = $listing;
+        }
+
+        if (count($listings) > 0) {
+            $result['listings'] = $listings;
+            return $result;
+        } else {
+            $result['error'] = true;
+            $result['listings'] = $listings;
+            return $result;
+        }
+    }
+
+
+    public function retrieveUserUnpublishedListings($userId)
+    {
+        $listings = [];
+        $result = ["error" => false];
+
+        $sql = "SELECT 
+                    i.dt_pub_date AS `publish_date`,
+                    i.fk_i_category_id AS `category_id`,
+                    cd.s_name AS `category_name`,
+                    i.pk_i_id AS `listing_id`, 
+                    tu.pk_i_id AS `user_id`,
+                    id.s_title AS `title`,
+                    id.s_description AS `description`,
+                    'sold' AS `status`,
+                    i.f_price,
+                    i_price AS `price`,
+                    i.fk_c_currency_code AS `currency`,
+                    il.s_address AS `address`,
+                    il.s_city AS `city`,
+                    il.s_country AS `country`,
+                    il.s_region AS `region`,
+                    i.s_contact_name AS `publisher_name`,
+                    i.s_contact_email AS `publisher_email`,
+                    tu.s_phone_mobile AS `publisher_mobile_no`,
+                    tu.s_website AS `website`,
+					group_concat(concat(ir.s_path ,ir.pk_i_id,'.',ir.s_extension)) AS images                  
+                FROM bf_t_item i
+                JOIN bf_t_item_description id ON id.fk_i_item_id = i.pk_i_id
+                JOIN bf_t_user tu ON tu.pk_i_id = i.fk_i_user_id
+                JOIN bf_t_item_location il ON il.fk_i_item_id = i.pk_i_id
+                JOIN bf_t_item_resource ir ON ir.fk_i_item_id = i.pk_i_id
+                JOIN bf_t_category_description cd ON cd.fk_i_category_id = i.fk_i_category_id
                 WHERE tu.pk_i_id = :user_id
                 GROUP BY i.pk_i_id
                 ORDER BY i.dt_pub_date DESC;";
@@ -129,7 +247,7 @@ class Listing
     public function postNewListing()
     {
         $result = ["error" => false,
-                    "message"=>"Listing was posted successfully"];
+            "message" => "Listing was posted successfully"];
 
         $this->newListing['secret'] = $this->genRandomPassword();
 
@@ -201,18 +319,15 @@ class Listing
     private function save(&$lastInsertImageCounter, $filename, $itemId, $compression = 100)
     {
 
-        $target_path1 = realpath(__DIR__ . '/../../../..')."/bf/oc-content/uploads/0/";
+        $target_path1 = realpath(__DIR__ . '/../../../..') . "/bf/oc-content/uploads/0/";
         $s_content_type = 'image/jpeg';
         $path = 'oc-content/uploads/0/';
 
         $img = explode('.', $filename);
 
-        if($lastInsertImageCounter == 0)
-        {
+        if ($lastInsertImageCounter == 0) {
             $imageItemId = $this->getLastImageResourceId() + 1;
-        }
-        else
-        {
+        } else {
             $imageItemId = ++$lastInsertImageCounter;
         }
 
@@ -333,7 +448,7 @@ class Listing
         $showPublisherEmail = true;
         $ip = "1.1.1.1";
         $now = date('Y-m-d H:i:s');
-        $priceCorrection = (int) $this->newListing['price'] * 1000000;
+        $priceCorrection = (int)$this->newListing['price'] * 1000000;
         $sql = "INSERT INTO bf_t_item (fk_i_user_id, 
                                         dt_pub_date,
                                         fk_i_category_id,
@@ -383,7 +498,7 @@ class Listing
 
     private function getLastImageResourceId()
     {
-        $sql = "select pk_i_id from bf_t_item_resource ORDER BY pk_i_id DESC LIMIT 1";
+        $sql = "SELECT pk_i_id FROM bf_t_item_resource ORDER BY pk_i_id DESC LIMIT 1";
         $sth = $this->conn->prepare($sql);
         $sth->execute();
         $result = $sth->fetch();
@@ -402,10 +517,8 @@ class Listing
         $sth->execute();
         $tempResult = $sth->fetchAll(PDO::FETCH_ASSOC);
 
-        foreach ($tempResult as $category)
-        {
-            if($category['categoryParentId'] == 0)
-            {
+        foreach ($tempResult as $category) {
+            if ($category['categoryParentId'] == 0) {
                 $category['subCategories'] = $this->getSubCategories($tempResult, $category['categoryId']);
                 $result[] = $category;
             }
@@ -414,14 +527,38 @@ class Listing
         return $result;
     }
 
+    public function getPopularKeywords()
+    {
+        $popularKeywords = [
+            ['categoryId' => 31, 'keyword' => "Toyota RAV4"],
+            ['categoryId' => 15, 'keyword' => "LG V30"],
+            ['categoryId' => 15, 'keyword' => "IPHONE X"],
+            ['categoryId' => 54, 'keyword' => "Acer Swift 1"],
+            ['categoryId' => 33, 'keyword' => "DT125"],
+            ['categoryId' => 31, 'keyword' => "Nissan Rogue"],
+            ['categoryId' => 33, 'keyword' => "Force X Royale"],
+            ['categoryId' => 54, 'keyword' => "Dell XPS 13"],
+            ['categoryId' => 15, 'keyword' => "HUAWEI MATE 10 PRO"],
+            ['categoryId' => 33, 'keyword' => "Crypton 07C"],
+            ['categoryId' => 54, 'keyword' => "Apple MacBook Pro"],
+            ['categoryId' => 31, 'keyword' => "Toyota Corolla"],
+            ['categoryId' => 15, 'keyword' => "GOOGLE PIXEL 2 XL AND PIXEL 2"],
+            ['categoryId' => 31, 'keyword' => "Ford F-Series"],
+            ['categoryId' => 54, 'keyword' => "Lenovo ThinkPad T470"],
+            ['categoryId' => 15, 'keyword' => "SAMSUNG GALAXY S8"],
+            ['categoryId' => 31, 'keyword' => "Chevrolet Silverado"],
+            ['categoryId' => 31, 'keyword' => "Toyota Camry"]
+        ];
+
+        return $popularKeywords;
+    }
+
     private function getSubCategories($allCategories, $parentId)
     {
         $result = [];
-        foreach ($allCategories as $category)
-        {
-            if($category['categoryParentId']== $parentId)
-            {
-                $result[]= $category;
+        foreach ($allCategories as $category) {
+            if ($category['categoryParentId'] == $parentId) {
+                $result[] = $category;
             }
         }
 

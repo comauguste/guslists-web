@@ -1,4 +1,5 @@
 <?php
+
 use Listing\Listing;
 use \Psr\Http\Message\ServerRequestInterface as Request;
 use \Psr\Http\Message\ResponseInterface as Response;
@@ -27,6 +28,30 @@ $app->get('/categories', function (Request $request, Response $response) {
     return $response->withJson($listings->getAvailableCategories());
 });
 
+
+$app->get('/listings/popularKeywords', function (Request $request, Response $response, $args) {
+    require 'classes/listing.php';
+
+    $listings = new Listing();
+    return $response->withJson($listings->getPopularKeywords());
+});
+
+$app->get('/listings/published/{userId}', function (Request $request, Response $response, $args) {
+    require 'classes/listing.php';
+
+    $userId = (int)$args['userId'];
+    $listings = new Listing();
+    return $response->withJson($listings->retrieveUserPublishedListings($userId));
+});
+
+$app->get('/listings/unpublished/{userId}', function (Request $request, Response $response, $args) {
+    require 'classes/listing.php';
+
+    $userId = (int)$args['userId'];
+    $listings = new Listing();
+    return $response->withJson($listings->retrieveUserUnpublishedListings($userId));
+});
+
 $app->get('/listings/{userId}', function (Request $request, Response $response, $args) {
     require 'classes/listing.php';
 
@@ -39,15 +64,14 @@ $app->post('/listings', function (Request $request, Response $response) {
     require 'classes/listing.php';
     $params = $request->getParsedBody();
 
-    $check = verifyRequiredParams($params, ['userId', 'title', 'description', 'categoryId','price','currency', 'contactName',
-    'contactEmail', 'cityArea', 'country', 'region', 'address']);
+    $check = verifyRequiredParams($params, ['userId', 'title', 'description', 'categoryId', 'price', 'currency', 'contactName',
+        'contactEmail', 'cityArea', 'country', 'region', 'address']);
     if ($check['error'] == true) {
         return $response->withJson($check, 400);
     }
     $listings = new Listing($params);
     return $response->withJson($listings->postNewListing());
 });
-
 
 $app->get('/user/{userId}', function (Request $request, Response $response, $args) {
     require 'classes/user.php';
@@ -62,7 +86,7 @@ $app->post('/user', function (Request $request, Response $response) {
 
     $params = $request->getParsedBody();
 
-    $check = verifyRequiredParams($params, ['fullName', 'email', 'phoneNumber', 'profilePicture','facebookId']);
+    $check = verifyRequiredParams($params, ['fullName', 'email', 'phoneNumber', 'profilePicture', 'facebookId']);
     if ($check['error'] == true) {
         return $response->withJson($check, 400);
     }
@@ -104,6 +128,167 @@ $app->post('/user/update', function (Request $request, Response $response, $args
         $dayOfBirth, $address, $gender));
 });
 
+
+$app->post('/user/update/name', function (Request $request, Response $response, $args) {
+    require 'classes/user.php';
+
+    $params = $request->getParsedBody();
+
+    $check = verifyRequiredParams($params, ['userId', 'fullName']);
+    if ($check['error'] == true) {
+        return $response->withJson($check, 400);
+    }
+
+    $userId = (int)$params['userId'];
+    $fullName = $params['fullName'];
+
+    $user = new \User\User();
+    return $response->withJson($user->updateUserName($userId, $fullName));
+});
+
+$app->post('/user/update/email', function (Request $request, Response $response, $args) {
+    require 'classes/user.php';
+
+    $params = $request->getParsedBody();
+
+    $check = verifyRequiredParams($params, ['userId', 'email']);
+    if ($check['error'] == true) {
+        return $response->withJson($check, 400);
+    }
+
+    $userId = (int)$params['userId'];
+    $email = $params['email'];
+
+    $user = new \User\User();
+    return $response->withJson($user->updateUserEmail($userId, $email));
+});
+
+
+$app->post('/user/update/phone', function (Request $request, Response $response, $args) {
+    require 'classes/user.php';
+
+    $params = $request->getParsedBody();
+
+    $check = verifyRequiredParams($params, ['userId', 'phoneNumber']);
+    if ($check['error'] == true) {
+        return $response->withJson($check, 400);
+    }
+
+    $userId = (int)$params['userId'];
+    $phoneNumber = $params['phoneNumber'];
+
+    $user = new \User\User();
+    return $response->withJson($user->updateUserPhoneNumber($userId, $phoneNumber));
+});
+
+
+$app->post('/user/update/gender', function (Request $request, Response $response, $args) {
+    require 'classes/user.php';
+
+    $params = $request->getParsedBody();
+
+    $check = verifyRequiredParams($params, ['userId', 'gender']);
+    if ($check['error'] == true) {
+        return $response->withJson($check, 400);
+    }
+
+    $userId = (int)$params['userId'];
+    $gender = $params['gender'];
+
+    $user = new \User\User();
+    return $response->withJson($user->updateUserGender($userId, $gender));
+});
+
+
+$app->post('/user/update/location', function (Request $request, Response $response, $args) {
+    require 'classes/user.php';
+
+    $params = $request->getParsedBody();
+
+    $check = verifyRequiredParams($params, ['userId', 'fullName']);
+    if ($check['error'] == true) {
+        return $response->withJson($check, 400);
+    }
+
+    $userId = (int)$params['userId'];
+    $fullName = $params['fullName'];
+
+    $user = new \User\User();
+    return $response->withJson($user->updateUserName($userId, $fullName));
+});
+
+
+$app->post('/user/update/birthday', function (Request $request, Response $response, $args) {
+    require 'classes/user.php';
+
+    $params = $request->getParsedBody();
+
+    $check = verifyRequiredParams($params, ['userId', 'dayOfBirth']);
+    if ($check['error'] == true) {
+        return $response->withJson($check, 400);
+    }
+
+    $userId = (int)$params['userId'];
+    $dayOfBirth = $params['dayOfBirth'];
+
+    $user = new \User\User();
+    return $response->withJson($user->updateUserBirthday($userId, $dayOfBirth));
+});
+
+$app->post('/user/update/biography', function (Request $request, Response $response, $args) {
+    require 'classes/user.php';
+
+    $params = $request->getParsedBody();
+
+    $check = verifyRequiredParams($params, ['userId', 'biography']);
+    if ($check['error'] == true) {
+        return $response->withJson($check, 400);
+    }
+
+    $userId = (int)$params['userId'];
+    $biography = $params['biography'];
+
+    $user = new \User\User();
+    return $response->withJson($user->updateUserBiography($userId, $biography));
+});
+
+
+$app->post('user/update/company/identity', function (Request $request, Response $response, $args) {
+    require 'classes/user.php';
+
+    $params = $request->getParsedBody();
+
+    $check = verifyRequiredParams($params, ['userId', 'fullName']);
+    if ($check['error'] == true) {
+        return $response->withJson($check, 400);
+    }
+
+    $userId = (int)$params['userId'];
+    $fullName = $params['fullName'];
+
+    $user = new \User\User();
+    return $response->withJson($user->updateUserName($userId, $fullName));
+});
+
+$app->post('/user/update/profilePicture', function (Request $request, Response $response, $args) {
+    require 'classes/user.php';
+
+    $params = $request->getParsedBody();
+
+    var_dump($params);
+
+    $check = verifyRequiredParams($params, ['userId', 'profilePicture']);
+    if ($check['error'] == true) {
+        return $response->withJson($check, 400);
+    }
+
+    $userId = (int)$params['userId'];
+    $profileImage = $params['profilePicture'];
+
+    $user = new \User\User();
+    return $response->withJson($user->uploadProfileImage($userId, $profileImage));
+});
+
 $app->post('/user/login/phone', function (Request $request, Response $response, $args) {
     require 'classes/user.php';
 
@@ -118,8 +303,7 @@ $app->post('/user/login/phone', function (Request $request, Response $response, 
     $user = new \User\User();
     $output = $user->getUserByPhoneNumber($phone);
 
-    if($output['statusCode'] == '404')
-    {
+    if ($output['statusCode'] == '404') {
         return $response->withJson($output, 404);
     }
 
@@ -140,8 +324,7 @@ $app->post('/user/login/email', function (Request $request, Response $response, 
     $user = new \User\User();
     $output = $user->getUserByEmail($email);
 
-    if($output['statusCode'] == '404')
-    {
+    if ($output['statusCode'] == '404') {
         return $response->withJson($output, $output['statusCode']);
     }
 
@@ -164,8 +347,7 @@ $app->post('/user/login/facebook', function (Request $request, Response $respons
     $user = new \User\User();
     $output = $user->getUserByFacebookId($facebookId);
 
-    if($output['statusCode'] == '404')
-    {
+    if ($output['statusCode'] == '404') {
         return $response->withJson($output, $output['statusCode']);
     }
 
