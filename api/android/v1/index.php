@@ -199,24 +199,24 @@ $app->post('/user/update/gender', function (Request $request, Response $response
     return $response->withJson($user->updateUserGender($userId, $gender));
 });
 
-
 $app->post('/user/update/location', function (Request $request, Response $response, $args) {
     require 'classes/user.php';
 
     $params = $request->getParsedBody();
 
-    $check = verifyRequiredParams($params, ['userId', 'fullName']);
+    $check = verifyRequiredParams($params, ['userId', 'country', 'state', 'city']);
     if ($check['error'] == true) {
         return $response->withJson($check, 400);
     }
 
     $userId = (int)$params['userId'];
-    $fullName = $params['fullName'];
+    $country = $params['country'];
+    $state = $params['state'];
+    $city = $params['city'];
 
     $user = new \User\User();
-    return $response->withJson($user->updateUserName($userId, $fullName));
+    return $response->withJson($user->updateUserLocation($userId, $country, $state, $city));
 });
-
 
 $app->post('/user/update/birthday', function (Request $request, Response $response, $args) {
     require 'classes/user.php';
@@ -274,8 +274,6 @@ $app->post('/user/update/profilePicture', function (Request $request, Response $
     require 'classes/user.php';
 
     $params = $request->getParsedBody();
-
-    var_dump($params);
 
     $check = verifyRequiredParams($params, ['userId', 'profilePicture']);
     if ($check['error'] == true) {

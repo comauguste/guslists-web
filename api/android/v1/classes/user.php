@@ -2,6 +2,7 @@
 
 namespace User;
 
+use DateTime;
 use Error\Error;
 use Guslists\Db;
 use PDO;
@@ -135,10 +136,13 @@ class User
     {
         $sql = "SELECT u.pk_i_id AS `userId`,
 		u.dt_reg_date AS `registrationDate`,
+		u.dt_mod_date_profile_pic AS `profilePictureLastModified`,
 		u.s_name AS `fullName`,
 		u.s_email AS `email`,
 		u.s_phone_mobile AS `phoneNumber`,
-		u.s_biography AS `biography`,
+		u.s_country AS `country`,
+		u.s_region AS `state`,
+		u.s_city AS `city`,
 		concat(u.s_country,', ',u.s_region,', ',u.s_city) AS `address`,
 		u.s_day_of_birth AS `dayOfBirth`,
         u.s_gender AS `gender`
@@ -365,6 +369,26 @@ class User
         return $this->response;
     }
 
+    public function updateUserLocation($userId, $country, $state, $city)
+    {
+        $sql = "UPDATE bf_t_user SET
+                s_country = :country,
+                s_region = :state,
+                s_city = :city
+                WHERE pk_i_id = :userId ;";
+
+        $sth = $this->conn->prepare($sql);
+        $sth->bindParam(":userId", $userId);
+        $sth->bindParam(":country", $country);
+        $sth->bindParam(":state", $state);
+        $sth->bindParam(":city", $city);
+        $sth->execute();
+
+        $this->response["user"] = $this->getUserByUserId($userId);
+
+        return $this->response;
+    }
+
     public function uploadProfileImage($userId, $profileImage)
     {
 
@@ -392,8 +416,22 @@ class User
         $internalUploadDir = realpath(__DIR__ . '/../../../..') . "/bf/oc-content/plugins/profile_picture/images/profile" . $userId . ".jpg";
         $success = file_put_contents($internalUploadDir, base64_decode($profilePicture));
 
+        if ($success) {
+            $dt = new DateTime();
+            $now = $dt->format('Y-m-d H:i:s');
+            $sql = "UPDATE bf_t_user SET
+                dt_mod_date_profile_pic = :now
+                WHERE pk_i_id = :userId ;";
+
+            $sth = $this->conn->prepare($sql);
+            $sth->bindParam(":userId", $userId);
+            $sth->bindParam(":now", $now);
+            $sth->execute();
+        }
+
         return $imagePath;
     }
+
 
     private function getProfileImagePath($userId)
     {
